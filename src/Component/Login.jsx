@@ -37,7 +37,7 @@ const Login = () => {
       style={{
         // backgroundImage: `url(${BG})`,
         backgroundSize: "cover",
-        height: "100vh",
+        // height: "100vh",
       }}
     >
       <ThemeProvider theme={defaultTheme}>
@@ -51,7 +51,7 @@ const Login = () => {
             }}
           >
             <Typography>
-              <img src={Logo} alt="Image Error"  style={{ marginTop: "5rem" }} />
+              <img src={Logo} alt="Image Error"/>
             </Typography>
             <Typography component="h1" variant="h5">
               Sign in

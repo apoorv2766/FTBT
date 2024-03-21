@@ -73,7 +73,7 @@ function BT() {
       const xmlDoc = parser.parseFromString(content, "text/xml");
       const tuvNodes = xmlDoc.getElementsByTagName("tuv");
       const englishTranslations = Array.from(tuvNodes)
-        .filter((node) => node.getAttribute("xml:lang") === "IT")
+        .filter((node) => node.getAttribute("xml:lang") === "KN" )
         .map((node) => node.querySelector("seg").textContent);
       setTcxData(englishTranslations);
       setEditableData(new Array(englishTranslations.length).fill(""));
@@ -252,12 +252,10 @@ function BT() {
                 </TableCell>
                 <TableCell
                   style={{
-                    width: "25%",
-                    fontSize: "1rem",
-                    // border: "1px solid",
+                    fontSize: "1rem",width:"30%" 
                   }}
                 >
-                  {tcxData[index]}
+                 {tcxData[index]}
                 </TableCell>
                 <TableCell
                   style={{

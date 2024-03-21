@@ -14,10 +14,10 @@ import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import SaveIcon from "@material-ui/icons/Save";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
-function FT() {
+function SourceBT() {
   const [csvData, setCSVData] = useState([]);
   const [tcxData, setTcxData] = useState([]);
   const [editableData, setEditableData] = useState([]);
@@ -26,22 +26,41 @@ function FT() {
   const [downloadReady, setDownloadReady] = useState(false);
   const [dataTrue, setDataTrue] = useState(false);
 
+  // const handleFileUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     const content = e.target.result;
+  //     const rows = content.split("\n").map((row) => row.trim());
+  //     const data = rows
+  //       .map((row, index) => {
+  //         if (index === 0) return null;
+  //         return row.split(",");
+  //       })
+  //       .filter((row) => row !== null);
+  //       console.log(data);
+  //     setCSVData(data);
+  //   };
+  //   reader.readAsText(file, "ISO-8859-1");
+  // };
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target.result;
-      const rows = content.split("\n").map((row) => row.trim());
-      const data = rows
-        .map((row, index) => {
-          if (index === 0) return null;
-          return row.split(",");
-        })
-        .filter((row) => row !== null);
-      setCSVData(data);
+
+    const fileReader = new FileReader();
+    fileReader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+
+      const parsedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      setCSVData(parsedData);
     };
-    reader.readAsText(file, "ISO-8859-1");
+    fileReader.readAsArrayBuffer(file);
   };
 
   const handleFileUploadTcx = (event) => {
@@ -54,50 +73,26 @@ function FT() {
       const xmlDoc = parser.parseFromString(content, "text/xml");
       const tuvNodes = xmlDoc.getElementsByTagName("tuv");
       const englishTranslations = Array.from(tuvNodes)
-        .filter((node) => node.getAttribute("xml:lang") === "EN-US")
+        .filter((node) => node.getAttribute("xml:lang") === "IT")
         .map((node) => node.querySelector("seg").textContent);
       setTcxData(englishTranslations);
       setEditableData(new Array(englishTranslations.length).fill(""));
       setDownloadReady(true);
       const knTranslations = Array.from(tuvNodes)
-        .filter((node) => node.getAttribute("xml:lang") === "KN")
+        .filter((node) => node.getAttribute("xml:lang") === "EN-US")
         .map((node) => node.querySelector("seg").textContent);
       setFTData(knTranslations);
     };
     reader.readAsText(file, "ISO-8859-1");
   };
 
-  // const compareAndSetFT = (sourceSentence, tmxSentence) => {
-  //   const sourceString = String(sourceSentence)
-  //     .trim()
-  //     .replace(/[^\w\s]/g, "");
-  //   const tmxString = String(tmxSentence)
-  //     .trim()
-  //     .replace(/[^\w\s]/g, "");
-
-  //   const sourceWords = sourceString.split(/\s+/).sort().join(" ");
-  //   const tmxWords = tmxString.split(/\s+/).sort().join(" ");
-
-  //   if (sourceWords.length !== tmxWords.length) {
-  //     return "Wrong";
-  //   }
-
-  //   for (let i = 0; i < sourceWords.length; i++) {
-  //     if (sourceWords[i] !== tmxWords[i]) {
-  //       return "Wrong";
-  //     }
-  //   }
-
-  //   return "Right";
-  // };
-
   const compareAndSetFT = (sourceSentence, tmxSentence) => {
     const sourceString = String(sourceSentence)
       .trim()
-      .replace(/[^\w\s]/g, ""); // Remove special characters except alphanumeric characters
+      .replace(/[^\w\s]/g, "");
     const tmxString = String(tmxSentence)
       .trim()
-      .replace(/[^\w\s]/g, ""); // Remove special characters except alphanumeric characters
+      .replace(/[^\w\s]/g, "");
 
     const sourceWords = sourceString.split(/\s+/).sort().join(" ");
     const tmxWords = tmxString.split(/\s+/).sort().join(" ");
@@ -134,7 +129,7 @@ function FT() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "ft_column_data.csv");
+    link.setAttribute("download", "Bt.csv");
     document.body.appendChild(link);
     link.click();
   };
@@ -182,7 +177,7 @@ function FT() {
       >
         <input
           type="file"
-          accept=".csv"
+          accept=".xlsx"
           onChange={handleFileUpload}
           style={{ display: "none" }}
           id="fileInput"
@@ -227,7 +222,7 @@ function FT() {
           <TableHead>
             <TableRow>
               <TableCell>
-                <b>Source</b>
+                <b>FT</b>
               </TableCell>
               <TableCell>
                 <b>TMX</b>
@@ -236,7 +231,7 @@ function FT() {
                 <b>Edit</b>
               </TableCell>
               <TableCell>
-                <b>FT</b>
+                <b>BT</b>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -246,21 +241,23 @@ function FT() {
                 <TableCell
                   style={{
                     fontSize: "1rem",
-                    // display: "flex",
+                    width: "25%",
                     // border: "1px solid",
                   }}
                 >
-                  <div style={{display:"flex"}}>
+                  <div style={{ display: "flex" }}>
                     <div>({index + 1})</div>
                     <div style={{ marginLeft: "0.5rem" }}>{csvRow}</div>
                   </div>
                 </TableCell>
                 <TableCell
                   style={{
-                    fontSize: "1rem",width:"30%" 
+                    width: "25%",
+                    fontSize: "1rem",
+                    // border: "1px solid",
                   }}
                 >
-                 {tcxData[index]}
+                  {tcxData[index]}
                 </TableCell>
                 <TableCell
                   style={{
@@ -304,12 +301,8 @@ function FT() {
                   </Button>
                 </TableCell>
                 <TableCell>
-                  <div
-                    style={{
-                      // border: "2px solid",
-                      width: "100%",
-                    }}
-                  >
+                      
+                <div >
                     <CKEditor
                       editor={ClassicEditor}
                       data={
@@ -333,4 +326,4 @@ function FT() {
   );
 }
 
-export default FT;
+export default SourceBT;
