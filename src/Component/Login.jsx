@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Logo from "../images/signInLogo.jpeg";
-import BG from "../images/pexels-jess-bailey-designs-965119.jpg";
+import BG from "../images/pexels-ylanite-koppens-1445416.jpg";
 import { useState } from "react";
 
 const defaultTheme = createTheme();
@@ -33,25 +33,20 @@ const Login = () => {
   };
 
   return (
-    <Typography
-      style={{
-        // backgroundImage: `url(${BG})`,
-        backgroundSize: "cover",
-        // height: "100vh",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
+    <div style={{ display:"flex" }}>
+      <img src={BG} alt="image error" width={"70%"} />
+          <ThemeProvider theme={defaultTheme} style={{border: "1px solid",}}>
         <Container component="main" maxWidth="xs">
-          <CssBaseline />
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              marginTop: "2rem",
             }}
           >
             <Typography>
-              <img src={Logo} alt="Image Error"/>
+              <img src={Logo} alt="Image Error" />
             </Typography>
             <Typography component="h1" variant="h5">
               Sign in
@@ -112,7 +107,7 @@ const Login = () => {
           </Box>
         </Container>
       </ThemeProvider>
-    </Typography>
+    </div>
   );
 };
 export default Login;
